@@ -147,6 +147,46 @@ class StartScreen:
             screen.blit(text, (text_x, text_y))
 
 
+def change_place(pos):
+    image = load_image('cursor.png')
+    screen.blit(image, (pos[0], pos[1]))
+
+
+def change_text_start(pos):
+    global f1, f2, f3, f4, f5, INTRO
+    x, y = pos
+    if 475 <= x <= 475 + 250 and 295 <= y <= 295 + 61 and not f1:
+        INTRO[0][1] = 1
+        f1 = True
+    elif f1 and not (475 <= x <= 475 + 295 and 295 <= y <= 250 + 61):
+        INTRO[0][1] = 0
+        f1 = False
+    elif 483 <= x <= 483 + 235 and 355 <= y <= 355 + 61 and not f2:
+        INTRO[1][1] = 1
+        f2 = True
+    elif f2 and not (483 <= x <= 483 + 235 and 355 <= y <= 355 + 61):
+        INTRO[1][1] = 0
+        f2 = False
+    elif 523 <= x <= 523 + 154 and 415 <= y <= 415 + 61 and not f3:
+        INTRO[2][1] = 1
+        f3 = True
+    elif f3 and not (523 <= x <= 523 + 154 and 415 <= y <= 415 + 61):
+        INTRO[2][1] = 0
+        f3 = False
+    elif 415 <= x <= 415 + 370 and 475 <= y <= 475 + 61 and not f4:
+        INTRO[3][1] = 1
+        f4 = True
+    elif f4 and not (415 <= x <= 415 + 370 and 475 <= y <= 475 + 61):
+        INTRO[3][1] = 0
+        f4 = False
+    elif 532 <= x <= 532 + 137 and 535 <= y <= 535 + 61 and not f5:
+        INTRO[4][1] = 1
+        f5 = True
+    elif f5 and not (532 <= x <= 532 + 137 and 535 <= y <= 535 + 61):
+        INTRO[4][1] = 0
+        f5 = False
+
+
 def terminate():
     pygame.quit()
     sys.exit()
@@ -206,6 +246,498 @@ def show_start_screen():
         change_place(mouse_on_screen)
     all_ghosts.update()
     all_ghosts.draw(screen)
+
+
+
+def controls_screen():
+    global mouse_on_screen, f6, color_back, music_on
+    while True:
+        show_controls()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif pygame.key.get_pressed()[pygame.K_e]:
+                if music_on:
+                    pygame.mixer.music.pause()
+                    music_on = False
+                else:
+                    pygame.mixer.music.unpause()
+                    music_on = True
+            elif event.type == pygame.MOUSEMOTION:
+                show_controls()
+                x, y = event.pos
+                if 538 <= x <= 538 + 125 and 525 <= y <= 525 + 61 and not f6:
+                    color_back = 1
+                    f6 = True
+                elif f6 and not (538 <= x <= 538 + 125 and 525 <= y <= 525 + 61):
+                    color_back = 0
+                    f6 = False
+                if pygame.mouse.get_focused():
+                    show_controls()
+                    change_place(event.pos)
+                    mouse_on_screen = event.pos
+            elif event.type == CONTINUEMOVE:
+                for ghost in all_ghosts:
+                    ghost.continue_moving()
+                pygame.time.set_timer(CONTINUEMOVE, 0)
+            elif event.type == pygame.MOUSEBUTTONDOWN and \
+                    event.button == 1:
+                if f6:
+                    start_screen_on()
+                    return
+        pygame.display.flip()
+
+
+def show_controls():
+    global mouse_on_screen, color_back
+    screen.fill((0, 0, 0))
+    text_controls = ["Управление",
+                     "Стрелки для управления пакмэном",
+                     "Esc: Пауза/Продолжить",
+                     "E: Включить/Выключить звук",
+                     "Назад"]
+
+    for ghost in all_ghosts:
+        ghost.move()
+        if ghost.show_name == 1:
+            screen.blit(ghost.text, (ghost.start_x, ghost.start_y))
+    all_ghosts.update()
+    all_ghosts.draw(screen)
+
+    if mouse_on_screen and pygame.mouse.get_focused():
+        change_place(mouse_on_screen)
+
+    draw_back(text_controls, 'controls')
+    all_sprites.draw(screen)
+
+
+def draw_back(text_list, place):
+    y = 0
+    if color_back == 0:
+        color = pygame.Color("white")
+    else:
+        color = pygame.Color("yellow")
+
+    if place == "controls":
+        size = 50
+    elif place == "about":
+        size = 30
+    elif place == "menu_1" or place == "menu_2":
+        size = 40
+    elif place == 'start':
+        color = pygame.Color("white")
+        size = 40
+        y = 10
+
+    if place == 'points':
+        for i in range(len(text_list)):
+            font = pygame.font.Font(FULLNAME, 30)
+            text = font.render(str(text_list[i]), 1, (pygame.Color("white")))
+            x = 250 + i * 200
+            y = 685
+            screen.blit(text, (x, y))
+    elif place == 'points_3':
+        for i in range(len(text_list)):
+            font = pygame.font.Font(FULLNAME, 30)
+            text = font.render(str(text_list[i]), 1, (pygame.Color("white")))
+            x = 500 + i * 200
+            y = 540
+            screen.blit(text, (x, y))
+    elif place == 'go1' or place == 'go2':
+        for i in range(len(text_list)):
+            font = pygame.font.Font(FULLNAME, 40)
+            text = font.render(str(text_list[i]), 1, (pygame.Color("white")))
+            start_x = WIDTH // 2 - text.get_width() // 2
+            start_y = HEIGHT // 2 - text.get_height() // 2
+            text_x = start_x
+            text_y = start_y + i * 60
+            if i == 1:
+                x, y = text_x, text_y
+            screen.blit(text, (text_x, text_y))
+        if place == "go2":
+            text = font.render(text_list[len(text_list) - 1], 1, (pygame.Color("yellow")))
+            screen.blit(text, (text_x, text_y))
+        else:
+            text = font.render(text_list[len(text_list) - 2], 1, (pygame.Color("yellow")))
+            screen.blit(text, (x, y))
+    else:
+        for i in range(len(text_list)):
+            font = pygame.font.Font(FULLNAME, size)
+            text = font.render(text_list[i], 1, (pygame.Color("white")))
+            start_x = WIDTH // 2 - text.get_width() // 2
+            start_y = HEIGHT // 2 - text.get_height() // 2 - 60
+            text_x = start_x
+            text_y = start_y + i * 60
+            if y:
+                text_y = y
+            screen.blit(text, (text_x, text_y))
+        if place == "menu_2":
+            text = font.render(text_list[len(text_list) - 1], 1, (pygame.Color("yellow")))
+            screen.blit(text, (text_x, text_y))
+        elif place == "menu_1":
+            text = font.render(text_list[0], 1, (pygame.Color("yellow")))
+            x = WIDTH // 2 - text.get_width() // 2
+            y = HEIGHT // 2 - text.get_height() // 2 - 60
+            screen.blit(text, (x, y))
+        else:
+            text = font.render(text_list[len(text_list) - 1], 1, (color))
+            screen.blit(text, (text_x, text_y))
+
+
+def about():
+    global mouse_on_screen, f6, color_back, music_on
+    f6 = False
+    color_back = 0
+    while True:
+        show_about()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif pygame.key.get_pressed()[pygame.K_e]:
+                if music_on:
+                    pygame.mixer.music.pause()
+                    music_on = False
+                else:
+                    pygame.mixer.music.unpause()
+                    music_on = True
+            elif event.type == pygame.MOUSEMOTION:
+                show_about()
+                x, y = event.pos
+                if 563 <= x <= 563 + 75 and 597 <= y <= 597 + 37 and not f6:
+                    color_back = 1
+                    f6 = True
+                elif f6 and not (563 <= x <= 563 + 75 and 597 <= y <= 597 + 37):
+                    color_back = 0
+                    f6 = False
+                if pygame.mouse.get_focused():
+                    show_about()
+                    change_place(event.pos)
+                    mouse_on_screen = event.pos
+            elif event.type == CONTINUEMOVE:
+                for ghost in all_ghosts:
+                    ghost.continue_moving()
+                pygame.time.set_timer(CONTINUEMOVE, 0)
+            elif event.type == pygame.MOUSEBUTTONDOWN and \
+                    event.button == 1:
+                if f6:
+                    start_screen_on()
+                    return
+        pygame.display.flip()
+
+
+def show_about():
+    global mouse_on_screen, color_back
+    screen.fill((0, 0, 0))
+
+    text_about = ["Пакман - аркадная видеоигра, вышедшая в 1980 году.",
+                  "Задача игрока — управляя Пакманом, съесть все точки в лабиринте, ",
+                  "избегая встречи с привидениями.",
+                  "Авторы игры: Бактияр Арсен и Бежнар Артем",
+                  "(с) Яндекс Лицей 2019",
+                  "Назад"]
+
+    for ghost in all_ghosts:
+        ghost.move()
+        if ghost.show_name == 1:
+            screen.blit(ghost.text, (ghost.start_x, ghost.start_y))
+    all_ghosts.update()
+    all_ghosts.draw(screen)
+    if mouse_on_screen and pygame.mouse.get_focused():
+        change_place(mouse_on_screen)
+    draw_back(text_about, 'about')
+    all_sprites.draw(screen)
+
+
+def pause_menu():
+    global start_game, start, stop_game, \
+        lives, score, map_on_screen_num, \
+        music_on, stop
+    button_1 = True
+    show_menu(1)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if pygame.key.get_pressed()[pygame.K_e]:
+                if music_on:
+                    pygame.mixer.music.pause()
+                    music_on = False
+                else:
+                    pygame.mixer.music.unpause()
+                    music_on = True
+            if pygame.key.get_pressed()[pygame.K_UP]:
+                show_menu(1)
+                button_1 = True
+            if pygame.key.get_pressed()[pygame.K_DOWN]:
+                show_menu(2)
+                button_1 = False
+            if pygame.key.get_pressed()[pygame.K_RETURN]:
+                if button_1:
+                    start_game = True
+                    return
+                else:
+                    for pm in pacman_sprite:
+                        pm.kill()
+                    for rect in all_rects:
+                        rect.kill()
+                    for ghost in ghost_sprites:
+                        ghost.kill()
+                    lives = 3
+                    score = 0
+                    stop = False
+                    map_on_screen_num = 1
+                    before_game(map_on_screen_num)
+                    return
+            if pygame.key.get_pressed()[pygame.K_ESCAPE]:
+                start_game = True
+                return
+        pygame.display.flip()
+
+
+def show_menu(button):
+    ghost_sprites.draw(screen)
+    pygame.draw.rect(screen, (0, 175, 240), ([WIDTH // 2 - 225, HEIGHT // 2 - 100], [450, 150]), 10)
+    pygame.draw.rect(screen, pygame.Color("black"), ([WIDTH // 2 - 225, HEIGHT // 2 - 100], [450, 150]))
+    text_menu = ["Вернуться в игру",
+                 "Начать игру заново"]
+
+    if button == 1:
+        draw_back(text_menu, 'menu_1')
+    elif button == 2:
+        draw_back(text_menu, 'menu_2')
+
+
+class Map(pygame.sprite.Sprite):
+    def __init__(self, name):
+        super().__init__(all_maps)
+        image = load_image(name)
+        size_w = image.get_width()
+        size_h = image.get_height()
+        self.image = image
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect()
+        self.rect.x = WIDTH // 2 - size_w // 2
+        self.rect.y = HEIGHT // 2 - size_h // 2
+
+
+def before_game(map=1):
+    global stop
+    screen.fill(pygame.Color("black"))
+    all_maps.draw(screen)
+    all_maps.update()
+    stop = False
+    draw_back(['Чтобы начать игру, нажмите пробел'], 'start')
+    if map == 2:
+        for i in range(8):
+            GhostPlay(i)
+    elif map == 1:
+        for i in range(4):
+            GhostPlay(i)
+    elif map == 3:
+        for i in range(2):
+            GhostPlay(i)
+    pacman = Pacman(load_image("moving_pacman.png"), 2, 1, 33, 33)
+    if map != 3:
+        for i in range(lives):
+            screen.blit(image_life, (100 + 43 * i, 685))
+        draw_back(['Баллы', score], 'points')
+    else:
+        for i in range(lives):
+            screen.blit(image_life, (315 + 43 * i, 540))
+        draw_back(['Баллы', score], 'points_3')
+
+
+def game_over():
+    global start_game, start, stop_game, \
+        lives, score, music_on, map_on_screen_num, \
+        map_on_screen
+    button = True
+    show_game_over(1)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            if pygame.key.get_pressed()[pygame.K_e]:
+                if music_on:
+                    pygame.mixer.music.pause()
+                    music_on = False
+                else:
+                    pygame.mixer.music.unpause()
+                    music_on = True
+            if pygame.key.get_pressed()[pygame.K_UP]:
+                show_game_over(1)
+                button = True
+            if pygame.key.get_pressed()[pygame.K_DOWN]:
+                show_game_over(2)
+                button = False
+            if pygame.key.get_pressed()[pygame.K_RETURN]:
+                if button:
+                    for pm in pacman_sprite:
+                        pm.kill()
+                    for rect in all_rects:
+                        rect.kill()
+                    for ghost in ghost_sprites:
+                        ghost.kill()
+                    lives = 3
+                    map_on_screen_num = 1
+                    for map in all_maps:
+                        map.kill()
+                    for point in all_points:
+                        point.kill()
+                    map_on_screen = Map("map.png")
+                    points = Points()
+                    score = 0
+                    before_game(map_on_screen_num)
+                    return
+                else:
+                    terminate()
+        pygame.display.flip()
+
+
+def show_game_over(button):
+    ghost_sprites.draw(screen)
+    pygame.draw.rect(screen, (0, 175, 240),
+                     ([WIDTH // 2 - 310, HEIGHT // 2 - 200],
+                      [600, 400]), 10)
+    pygame.draw.rect(screen, pygame.Color("black"),
+                     ([WIDTH // 2 - 310, HEIGHT // 2 - 200],
+                      [600, 400]))
+    screen.blit(game_over_image, (WIDTH // 2 - 180,
+                                  HEIGHT // 2 - 200))
+    point = "Баллы: " + str(score)
+    text = [point,
+            "Повторить попытку",
+            "Выход"]
+    if button == 1:
+        draw_back(text, 'go1')
+    elif button == 2:
+        draw_back(text, 'go2')
+
+
+def winn_lvl():
+    global start_game, start, stop_game, \
+        lives, score, map_on_screen_num, map_on_screen, music_on
+    button = True
+    show_winn_screen(1)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+
+            elif pygame.key.get_pressed()[pygame.K_UP]:
+                show_winn_screen(1)
+                button = True
+            elif pygame.key.get_pressed()[pygame.K_DOWN]:
+                show_winn_screen(2)
+                button = False
+            elif pygame.key.get_pressed()[pygame.K_e]:
+                if music_on:
+                    pygame.mixer.music.pause()
+                    music_on = False
+                else:
+                    pygame.mixer.music.unpause()
+                    music_on = True
+            elif pygame.key.get_pressed()[pygame.K_RETURN]:
+                if button:
+                    for pm in pacman_sprite:
+                        pm.kill()
+                    for rect in all_rects:
+                        rect.kill()
+                    for ghost in ghost_sprites:
+                        ghost.kill()
+                    lives = 3
+                    if map_on_screen_num == 1:
+                        map_on_screen_num += 1
+                        before_game(map_on_screen_num)
+                    elif map_on_screen_num == 2:
+                        map_on_screen_num += 1
+                        for map in all_maps:
+                            map.kill()
+                        for point in all_points:
+                            point.kill()
+                        map_on_screen = Map("level.png")
+                        points = Points()
+                        before_game(map_on_screen_num)
+                    return
+                else:
+                    terminate()
+        pygame.display.flip()
+
+
+def show_winn_screen(button):
+    ghost_sprites.draw(screen)
+    pygame.draw.rect(screen, (0, 175, 240),
+                     ([WIDTH // 2 - 310, HEIGHT // 2 - 200],
+                      [600, 400]), 10)
+    pygame.draw.rect(screen, pygame.Color("black"),
+                     ([WIDTH // 2 - 310, HEIGHT // 2 - 200],
+                      [600, 400]))
+    screen.blit(winn_level, (WIDTH // 2 - 180,
+                             HEIGHT // 2 - 200))
+    text = ['Поздравляем, вы прошли уровень!',
+            "Cледующий уровень",
+            "Выход"]
+    if button == 1:
+        draw_back(text, 'go1')
+    elif button == 2:
+        draw_back(text, 'go2')
+
+
+def winn_game():
+    global start_game, start, stop_game, \
+        lives, score, map_on_screen_num, map_on_screen, music_on
+    button = True
+    add_table(new_record())
+    show_winn(1)
+    while True:
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+
+            if pygame.key.get_pressed()[pygame.K_e]:
+                if music_on:
+                    pygame.mixer.music.pause()
+                    music_on = False
+                else:
+                    pygame.mixer.music.unpause()
+                    music_on = True
+
+            if pygame.key.get_pressed()[pygame.K_UP]:
+                show_winn(1)
+                button = True
+            if pygame.key.get_pressed()[pygame.K_DOWN]:
+                show_winn(2)
+                button = False
+
+            if pygame.key.get_pressed()[pygame.K_RETURN]:
+                if button:
+                    record_menu(True)
+                    screen.fill((0, 0, 0))
+                    show_winn(1)
+                else:
+                    terminate()
+        pygame.display.flip()
+
+
+def show_winn(button):
+    ghost_sprites.draw(screen)
+    pygame.draw.rect(screen, (0, 175, 240),
+                     ([WIDTH // 2 - 310, HEIGHT // 2 - 200],
+                      [600, 400]), 10)
+    pygame.draw.rect(screen, pygame.Color("black"),
+                     ([WIDTH // 2 - 310, HEIGHT // 2 - 200],
+                      [600, 400]))
+
+    screen.blit(winn_level, (WIDTH // 2 - 180,
+                             HEIGHT // 2 - 200))
+    text = ['Поздравляем, вы прошли игру!',
+            "Таблица рекордов",
+            "Выход"]
+    if button == 1:
+        draw_back(text, 'go1')
+    elif button == 2:
+        draw_back(text, 'go2')
 
 
 class GhostPlay(pygame.sprite.Sprite):
@@ -535,3 +1067,289 @@ def show_record():
         change_place(mouse_on_screen)
 
 
+def add_table(name):
+    file_path = os.path.join('data', 'records.txt')
+    file_records = open(file_path, mode='a')
+    file_records.write(str(score) + ' ' + name + '\n')
+    file_records.close()
+
+    file_records = open(file_path, mode='r')
+    data = file_records.readlines()
+    file_records.close()
+
+    data.sort(key=lambda a: int(a.split()[0]),
+              reverse=True)
+
+    file_records = open(file_path, mode='w')
+    for line in data:
+        file_records.write(line)
+    file_records.close()
+
+
+def record_menu(end=False):
+    global mouse_on_screen, mouse_on_screen, music_on
+    color_back = pygame.Color("white")
+
+    file_path = os.path.join('data', 'records.txt')
+    file_records = open(file_path, mode='r')
+    data = file_records.readlines()
+    file_records.close()
+
+    while True:
+        if end:
+            show_record_menu(data, color_back, True)
+        else:
+            show_record_menu(data, color_back)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+
+            elif pygame.key.get_pressed()[pygame.K_e]:
+                if music_on:
+                    pygame.mixer.music.pause()
+                    music_on = False
+                else:
+                    pygame.mixer.music.unpause()
+                    music_on = True
+            elif event.type == CONTINUEMOVE:
+                for ghost in all_ghosts:
+                    ghost.continue_moving()
+                pygame.time.set_timer(CONTINUEMOVE, 0)
+
+            elif event.type == pygame.MOUSEMOTION:
+                if 534 <= event.pos[0] <= 643 and 596 <= event.pos[1] <= 637:
+                    color_back = pygame.Color("yellow")
+                else:
+                    color_back = pygame.Color("white")
+                if end:
+                    show_record_menu(data, color_back, True)
+                else:
+                    show_record_menu(data, color_back)
+                if pygame.mouse.get_focused():
+                    change_place(event.pos)
+                    mouse_on_screen = event.pos
+
+            elif event.type == pygame.MOUSEBUTTONDOWN and \
+                    event.button == 1:
+                if 534 <= event.pos[0] <= 643 and 596 <= event.pos[1] <= 637:
+                    return
+        pygame.display.flip()
+
+
+def show_record_menu(data, color, end=False):
+    global mouse_on_screen
+    screen.fill((0, 0, 0))
+    font = pygame.font.Font(FULLNAME, 45)
+
+    pygame.draw.rect(screen, pygame.Color("white"),
+                     ([100, 275],
+                      [1000, 300]), 5)
+    for i in range(3):
+        pygame.draw.line(screen, pygame.Color("white"),
+                         [350 + 250 * i, 275],
+                         [350 + 250 * i, 575], 5)
+    if data:
+        if len(data) <= 4:
+            data_1 = data[:len(data)]
+            data_2 = []
+        elif 4 <= len(data) <= 8:
+            data_1 = data[:4]
+            data_2 = data[4:8]
+        elif len(data) > 8:
+            data_1 = data[:4]
+            data_2 = data[4:8]
+
+        for i in range(len(data_1)):
+            line = data_1[i]
+            pos_1 = (150, 290 + i * 70)
+            pos_2 = (400, 290 + i * 70)
+            line = line.strip('\n').split()
+            line[0], line[1] = line[1], line[0]
+
+            string_rendered = font.render(line[0], 1, pygame.Color('white'))
+            intro_rect = string_rendered.get_rect().move(pos_1)
+            screen.blit(string_rendered, intro_rect)
+
+            string_rendered = font.render(line[1], 1, pygame.Color('white'))
+            intro_rect = string_rendered.get_rect().move(pos_2)
+            screen.blit(string_rendered, intro_rect)
+
+        for i in range(len(data_2)):
+            line = data_2[i]
+            pos_1 = (650, 290 + i * 70)
+            pos_2 = (900, 290 + i * 70)
+            line = line.strip('\n').split()
+            line[0], line[1] = line[1], line[0]
+
+            string_rendered = font.render(line[0], 1, pygame.Color('white'))
+            intro_rect = string_rendered.get_rect().move(pos_1)
+            screen.blit(string_rendered, intro_rect)
+
+            string_rendered = font.render(line[1], 1, pygame.Color('white'))
+            intro_rect = string_rendered.get_rect().move(pos_2)
+            screen.blit(string_rendered, intro_rect)
+
+    string_rendered = font.render('Назад', 1, color)
+    intro_rect = string_rendered.get_rect().move(550, 600)
+    screen.blit(string_rendered, intro_rect)
+
+    if mouse_on_screen and pygame.mouse.get_focused():
+        change_place(mouse_on_screen)
+    if not end:
+        all_sprites.draw(screen)
+        for ghost in all_ghosts:
+            ghost.move()
+            if ghost.show_name == 1:
+                screen.blit(ghost.text, (ghost.start_x, ghost.start_y))
+        all_ghosts.update()
+        all_ghosts.draw(screen)
+
+
+f1, f2, f3, f4, f5 = False, False, False, False, False
+f6 = False
+color_back = 0
+ghost_on_screen = 0
+Ghost(all_ghosts, GHOSTS[0])
+running = True
+mouse_on_screen = None
+
+pygame.mixer.init()
+song = os.path.join('data', 'music.mp3')
+pygame.mixer.music.load(song)
+pygame.mixer.music.play(100)
+music_on = True
+pygame.mixer.music.set_volume(0.3)
+image_life = load_image('pacman_lives.png')
+game_over_image = load_image("game_over.png")
+winn_level = load_image('winn_level.png')
+
+map_on_screen_num = 1
+
+start = StartScreen()
+start_screen_on()
+
+score = 0
+
+lives = 3
+stop_game = False
+start_game = False
+stop = False
+
+map_on_screen = Map("map.png")
+before_game(map_on_screen_num)
+
+iteration_kill = 0
+kill_num = 0
+iterations = 0
+points = Points()
+
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            terminate()
+        elif pygame.key.get_pressed()[pygame.K_SPACE] and \
+                not start_game and not stop:
+            pygame.time.set_timer(CHANGE, 2000)
+            screen.fill(pygame.Color("black"))
+            all_maps.draw(screen)
+            start_game = True
+        elif pygame.key.get_pressed()[pygame.K_e]:
+            if music_on:
+                pygame.mixer.music.pause()
+                music_on = False
+            else:
+                pygame.mixer.music.unpause()
+                music_on = True
+
+        elif event.type == CHANGE:
+            for ghost in ghost_sprites:
+                ghost.change()
+            pygame.time.set_timer(CHANGE, 3500)
+        elif pygame.key.get_pressed()[pygame.K_ESCAPE] and start_game:
+            start_game = False
+            pause_menu()
+
+        elif pygame.key.get_pressed()[pygame.K_RIGHT] and start_game:
+            for hero in pacman_sprite:
+                hero.move("right")
+        elif pygame.key.get_pressed()[pygame.K_LEFT] and start_game:
+            for hero in pacman_sprite:
+                hero.move("left")
+        elif pygame.key.get_pressed()[pygame.K_UP] and start_game:
+            for hero in pacman_sprite:
+                hero.move("up")
+        elif pygame.key.get_pressed()[pygame.K_DOWN] and start_game:
+            for hero in pacman_sprite:
+                hero.move("down")
+
+    if start_game:
+        screen.fill(pygame.Color("black"))
+        if map_on_screen_num != 3:
+            draw_back(['Баллы', score], 'points')
+        else:
+            draw_back(['Баллы', score], 'points_3')
+        all_points.draw(screen)
+        all_rects.update()
+        all_rects.draw(screen)
+        all_maps.draw(screen)
+        pacman_sprite.draw(screen)
+        if map_on_screen_num != 3:
+            for i in range(lives):
+                screen.blit(image_life, (100 + 43 * i, 685))
+        else:
+            for i in range(lives):
+                screen.blit(image_life, (315 + 43 * i, 540))
+        if iterations == 20:
+            pacman_sprite.update()
+            iterations = 0
+        for ghost in ghost_sprites:
+            ghost.move()
+        ghost_sprites.update()
+        ghost_sprites.draw(screen)
+        iterations += 1
+        if (score == 1840 and map_on_screen_num == 1) or \
+                (score == 3680 and map_on_screen_num == 2):
+            start_game = False
+            winn_lvl()
+        if score == 4170 and map_on_screen_num == 3:
+            start_game = False
+            winn_game()
+
+        if stop_game:
+            lives -= 1
+            start_game = False
+            for pm in pacman_sprite:
+                x, y = pm.rect.x, pm.rect.y
+            kill_pacman = KillPacman(load_image("killing_pacman.png"),
+                                     11, 1, 32, 32, x, y)
+
+    if stop_game:
+        stop = True
+        screen.fill(pygame.Color("black"))
+        all_points.draw(screen)
+        all_rects.draw(screen)
+        all_maps.draw(screen)
+        ghost_sprites.draw(screen)
+        pacman_kill.draw(screen)
+        iteration_kill += 1
+        if iteration_kill == 10:
+            pacman_kill.update()
+            iteration_kill = 0
+            kill_num += 1
+        if kill_num == 11:
+            kill_num = 0
+            stop_game = False
+            for ghost in ghost_sprites:
+                ghost.kill()
+            for pm in pacman_sprite:
+                pm.kill()
+            for pm in pacman_kill:
+                pm.kill()
+            if lives == -1:
+                add_table(new_record())
+                game_over()
+            else:
+                before_game(map_on_screen_num)
+                stop = False
+    pygame.display.flip()
