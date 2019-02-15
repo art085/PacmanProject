@@ -22,3 +22,4 @@ Pacman - очень популярная в прошлом игра, собст�
 Artem and Arsen :)
 
 
+https://docs.google.com/presentation/d/15mI1jMTNINYw95ziJqXA1Yz1QT-vve2Ot4PIMsMbmCs/edit#slide=id.p
